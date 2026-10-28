@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Perfume — демо-проект магазина парфюмерии</title>
+  <meta name="description" content="Демо-проект для портфолио: интернет-магазин парфюмерии с каталогом и корзиной. Товары и цены представлены для примера.">
+  <meta name="theme-color" content="#0a0a0a">
+
+  <!-- Иконка сайта прямо в коде (золотая звёздочка) — без отдельного файла -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a0a'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23d4af37'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+
+  <!-- Заранее подключаемся к серверам шрифтов и фото — так они грузятся быстрее -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+
+  <!-- Главное фото начинает грузиться сразу, ещё до стилей и скриптов -->
+  <link rel="preload" as="image" fetchpriority="high"
+        imagesrcset="https://images.unsplash.com/photo-1640181874799-e0c766339a4b?auto=format&fit=crop&w=400&h=500&q=70 400w,
+                     https://images.unsplash.com/photo-1640181874799-e0c766339a4b?auto=format&fit=crop&w=600&h=750&q=70 600w,
+                     https://images.unsplash.com/photo-1640181874799-e0c766339a4b?auto=format&fit=crop&w=800&h=1000&q=70 800w"
+        imagesizes="(max-width: 768px) 200px, 400px">
+
+  <!-- Бесплатные шрифты Google Fonts (display=swap: текст виден сразу, не ждёт шрифт) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Страховка от «чёрного экрана».
+       Класс js включает анимации появления (элементы сначала прячутся, потом проявляются).
+       Если script.js не загрузился или в нём ошибка — класс снимается, и весь сайт сразу виден. -->
+  <script>
+    document.documentElement.classList.add('js');
+    function disableAnimations() {
+      if (!window.siteReady) document.documentElement.classList.remove('js');
+    }
+    window.addEventListener('error', disableAnimations);
+    setTimeout(disableAnimations, 3000); // запасной вариант: скрипт так и не сообщил, что готов
+  </script>
+
+  <!-- Наши стили -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- defer: скрипт загружается параллельно и не задерживает показ страницы -->
+  <script src="script.js" defer onerror="disableAnimations()"></script>
+</head>
+<body>
+
+  <!-- Полоса прогресса прокрутки -->
+  <div class="progress" id="progress"></div>
+
+  <!-- ===== ШАПКА САЙТА ===== -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#home" class="logo">
+        <span class="logo__mark">✦</span>
+        <span class="shop-name">Luxury Perfume</span>
+      </a>
+
+      <nav class="nav" id="nav">
+        <a href="#home" class="nav__link">Главная</a>
+        <a href="#catalog" class="nav__link">Каталог</a>
+        <a href="#about" class="nav__link">О нас</a>
+        <a href="#contacts" class="nav__link">Контакты</a>
+      </nav>
+
+      <div class="header__actions">
+        <!-- Кнопка корзины. Число товаров подставляет script.js -->
+        <button class="cart-toggle" id="cartToggle" aria-label="Открыть корзину" aria-controls="cart">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M6 7h12l-1 13H7L6 7z"/>
+            <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+          <span class="cart-toggle__count" id="cartCount">0</span>
+        </button>
+
+        <!-- Кнопка-«бургер» для телефонов -->
+        <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Затемнение под мобильным меню -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ===== КОРЗИНА (выезжает справа) ===== -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart" id="cart" aria-label="Корзина" aria-hidden="true">
+    <div class="cart__header">
+      <h2 class="cart__title">Корзина</h2>
+      <button class="cart__close" id="cartClose" aria-label="Закрыть корзину">✕</button>
+    </div>
+
+    <!-- Сюда script.js добавляет товары -->
+    <ul class="cart__list" id="cartList"></ul>
+
+    <p class="cart__empty" id="cartEmpty">
+      Корзина пуста.<br>Добавьте аромат из каталога.
+    </p>
+
+    <div class="cart__footer" id="cartFooter">
+      <div class="cart__total">
+        <span>Итого:</span>
+        <strong id="cartTotal">0 ₸</strong>
+      </div>
+      <button class="btn btn--gold cart__checkout" id="checkoutBtn">Оформить заказ</button>
+    </div>
+  </aside>
+
+  <!-- ===== ДЕМО-УВЕДОМЛЕНИЕ =====
+       Это демо-версия для портфолио: заказы и связь отключены,
+       форма с именем и телефоном убрана — сайт не собирает личные данные. -->
+  <div class="modal" id="demoModal" aria-hidden="true">
+    <div class="modal__box order-success" role="dialog" aria-modal="true" aria-labelledby="demoTitle" aria-describedby="demoText">
+      <button class="modal__close" id="modalClose" aria-label="Закрыть">✕</button>
+      <div class="order-success__icon">✦</div>
+      <h2 class="modal__title" id="demoTitle">Демо-режим</h2>
+      <p class="modal__note" id="demoText">
+        Это демонстрационный сайт.<br>Реальные заказы не принимаются.
+      </p>
+      <div class="order-success__actions">
+        <button class="btn btn--gold" id="demoOk">Понятно</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ГЛАВНЫЙ ЭКРАН ===== -->
+  <section class="hero" id="home">
+    <div class="hero__glow"></div>
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <p class="hero__subtitle reveal">Коллекция 2026</p>
+        <h1 class="hero__title reveal">
+          Искусство <span class="gold-text">аромата</span><br>
+          в каждой капле
+        </h1>
+        <p class="hero__desc reveal">
+          Нишевая и селективная парфюмерия. Выберите аромат и соберите заказ в корзине.
+        </p>
+        <div class="hero__buttons reveal">
+          <a href="#catalog" class="btn btn--gold">Смотреть каталог</a>
+          <a href="#contacts" class="btn btn--outline">Связаться</a>
+        </div>
+      </div>
+
+      <div class="hero__visual reveal-right">
+        <figure class="hero__photo">
+          <!-- fetchpriority="high": главное фото грузится первым -->
+          <img
+            src="https://images.unsplash.com/photo-1640181874799-e0c766339a4b?auto=format&fit=crop&w=500&h=625&q=70"
+            srcset="https://images.unsplash.com/photo-1640181874799-e0c766339a4b?auto=format&fit=crop&w=400&h=500&q=70 400w,
+                    https://images.unsplash.com/photo-1640181874799-e0c766339a4b?auto=format&fit=crop&w=600&h=750&q=70 600w,
+                    https://images.unsplash.com/photo-1640181874799-e0c766339a4b?auto=format&fit=crop&w=800&h=1000&q=70 800w"
+            sizes="(max-width: 768px) 200px, 400px"
+            decoding="async"
+            width="400" height="500"
+            fetchpriority="high"
+            alt="Тёмный флакон духов на чёрно-красном фоне">
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== КАТАЛОГ ===== -->
+  <section class="catalog" id="catalog">
+    <div class="container">
+      <p class="section__subtitle reveal">Наши ароматы</p>
+      <h2 class="section__title reveal">Каталог</h2>
+      <div class="divider reveal-zoom"></div>
+
+      <!-- Пометка для посетителей портфолио -->
+      <p class="demo-note">Демо-проект. Товары и цены представлены для примера.</p>
+
+      <!-- Карточки товаров создаются автоматически в script.js -->
+      <div class="products" id="products"></div>
+    </div>
+  </section>
+
+  <!-- ===== О НАС ===== -->
+  <section class="about" id="about">
+    <div class="container about__grid">
+      <div class="feature reveal-left">
+        <div class="feature__icon">✧</div>
+        <h3>Подбор аромата</h3>
+        <p>Расскажите, что вам нравится, — подскажем, какой аромат выбрать.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature__icon">✈</div>
+        <h3>Доставка</h3>
+        <p>Сроки и стоимость доставки уточняются при заказе.</p>
+      </div>
+      <div class="feature reveal-right">
+        <div class="feature__icon">♛</div>
+        <h3>Подарочная упаковка</h3>
+        <p>Хотите вручить аромат в подарок? Спросите об упаковке при заказе.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== КОНТАКТЫ ===== -->
+  <section class="contacts" id="contacts">
+    <div class="container contacts__inner reveal-zoom">
+      <h2 class="section__title">Остались вопросы?</h2>
+      <p>Напишите нам в WhatsApp — поможем подобрать аромат.</p>
+      <!-- В демо-версии кнопка показывает уведомление вместо перехода в WhatsApp -->
+      <button type="button" class="btn btn--gold js-demo">Написать в WhatsApp</button>
+    </div>
+  </section>
+
+  <!-- ===== ПОДВАЛ ===== -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2026 <span class="shop-name">Luxury Perfume</span> — демо-проект для портфолио.</p>
+      <p class="footer__credit">Демо-проект. Товары и цены представлены для примера. Реальные заказы не принимаются.</p>
+      <p class="footer__credit">
+        Фото: <a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash</a> (бесплатная лицензия)
+      </p>
+    </div>
+  </footer>
+
+  <!-- Плавающая кнопка WhatsApp (в демо-версии показывает уведомление) -->
+  <button type="button" class="whatsapp-float js-demo" aria-label="Написать в WhatsApp (демо)">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+      <path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.43 9.43 0 1 1 7.99 4.42zm8.02-17.45A11.3 11.3 0 0 0 12.04.75C5.8.75.72 5.83.72 12.07c0 2 .52 3.94 1.51 5.65L.62 23.6l6.02-1.58a11.3 11.3 0 0 0 5.4 1.38h.01c6.24 0 11.32-5.08 11.32-11.32 0-3.03-1.18-5.87-3.31-8.01z"/>
+    </svg>
+  </button>
+</body>
+</html>
